@@ -16,6 +16,15 @@ import uuid
 
 import streamlit as st
 
+# Streamlit Community Cloud's Secrets UI populates st.secrets, not the OS
+# environment — bridge them into os.environ so llm.py's os.environ.get(...)
+# lookups work the same way locally (via .env) and when deployed.
+try:
+    for _key, _value in st.secrets.items():
+        os.environ.setdefault(_key, str(_value))
+except Exception:
+    pass  # no secrets configured (e.g. local run without .streamlit/secrets.toml)
+
 from app.core.ingestion import ingest_document
 from app.core.chunking import chunk_documents
 from app.core.vectorstore import add_documents_to_store, get_chunk_counts_by_source
