@@ -1,0 +1,13 @@
+.env
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+charts/*
+!charts/.gitkeep
+.DS_Store

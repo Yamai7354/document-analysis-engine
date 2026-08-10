@@ -1,0 +1,23 @@
+llm:
+  provider: openrouter
+  model: openai/gpt-oss-20b:free
+  temperature: 0.2
+
+embeddings:
+  model: all-MiniLM-L6-v2
+
+chunking:
+  chunk_size: 1000
+  chunk_overlap: 200
+
+retrieval:
+  top_k: 4
+
+agent:
+  max_tool_iterations: 4
+
+memory:
+  db_path: models/agent_memory.db
+
+charts:
+  output_dir: charts
