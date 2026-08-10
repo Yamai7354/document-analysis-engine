@@ -19,11 +19,14 @@ import streamlit as st
 # Streamlit Community Cloud's Secrets UI populates st.secrets, not the OS
 # environment — bridge them into os.environ so llm.py's os.environ.get(...)
 # lookups work the same way locally (via .env) and when deployed.
+_secrets_keys_found = []
+_secrets_error = None
 try:
     for _key, _value in st.secrets.items():
+        _secrets_keys_found.append(_key)
         os.environ.setdefault(_key, str(_value))
-except Exception:
-    pass  # no secrets configured (e.g. local run without .streamlit/secrets.toml)
+except Exception as e:
+    _secrets_error = str(e)  # no secrets configured, or secrets.toml failed to parse
 
 from app.core.ingestion import ingest_document
 from app.core.chunking import chunk_documents
@@ -59,6 +62,12 @@ st.info(
     "per visitor to keep the demo available for everyone. "
     "[See the project / get in touch](mailto:Randy.johnson7354@outlook.com)."
 )
+
+with st.expander("🔧 Debug: secrets status (temporary)", expanded=False):
+    st.caption(f"Secret keys found by st.secrets: {_secrets_keys_found or 'NONE'}")
+    st.caption(f"Error reading st.secrets: {_secrets_error or 'none'}")
+    st.caption(f"OPENROUTER_API_KEY present in os.environ: {'OPENROUTER_API_KEY' in os.environ}")
+    st.caption(f"HUGGINGFACEHUB_API_TOKEN present in os.environ: {'HUGGINGFACEHUB_API_TOKEN' in os.environ}")
 
 with st.sidebar:
     st.header("📄 Upload a document")
