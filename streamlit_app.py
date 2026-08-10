@@ -66,8 +66,42 @@ st.info(
 with st.expander("🔧 Debug: secrets status (temporary)", expanded=False):
     st.caption(f"Secret keys found by st.secrets: {_secrets_keys_found or 'NONE'}")
     st.caption(f"Error reading st.secrets: {_secrets_error or 'none'}")
+    _or_key = os.environ.get("OPENROUTER_API_KEY", "")
     st.caption(f"OPENROUTER_API_KEY present in os.environ: {'OPENROUTER_API_KEY' in os.environ}")
+    st.caption(f"OPENROUTER_API_KEY length: {len(_or_key)}")
+    st.caption(f"OPENROUTER_API_KEY starts with 'sk-or-': {_or_key.startswith('sk-or-')}")
     st.caption(f"HUGGINGFACEHUB_API_TOKEN present in os.environ: {'HUGGINGFACEHUB_API_TOKEN' in os.environ}")
+
+    if st.button("Test OpenRouter key directly (bypasses LangChain)"):
+        import requests
+        try:
+            resp = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {_or_key}"},
+                json={
+                    "model": "openai/gpt-oss-20b:free",
+                    "messages": [{"role": "user", "content": "Say ok."}],
+                },
+                timeout=30,
+            )
+            st.write("Status:", resp.status_code)
+            st.code(resp.text[:500])
+        except Exception as e:
+            st.error(f"Request failed: {e}")
+
+    if st.button("Test via LangChain ChatOpenAI"):
+        from langchain_openai import ChatOpenAI
+        try:
+            test_llm = ChatOpenAI(
+                model="openai/gpt-oss-20b:free",
+                temperature=0.2,
+                base_url="https://openrouter.ai/api/v1",
+                api_key=_or_key,
+            )
+            result = test_llm.invoke("Say ok.")
+            st.success(f"LangChain call succeeded: {result.content}")
+        except Exception as e:
+            st.error(f"LangChain call failed: {e}")
 
 with st.sidebar:
     st.header("📄 Upload a document")
