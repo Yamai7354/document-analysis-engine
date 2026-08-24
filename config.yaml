@@ -1,6 +1,6 @@
 llm:
   provider: openrouter
-  model: openai/gpt-oss-20b:free
+  model: nvidia/nemotron-3.5-lightning:free
   temperature: 0.2
 
 embeddings:
